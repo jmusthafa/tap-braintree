@@ -3,6 +3,7 @@ import braintree
 import pytz
 from flatten_json import flatten
 from datetime import datetime, timedelta, date
+from dateutil.parser import isoparse
 
 import types
 from decimal import Decimal
@@ -160,7 +161,7 @@ class BraintreeStream(Stream):
         self.logger.info(f" tap_states: {self.tap_state}")
 
         self.set_braintree_config()
-        start_timestamp = self.get_starting_timestamp(context)
+        start_timestamp = self.get_starting_timestamp(context) or isoparse(self.start_date)
         end_timestamp = datetime.utcnow()
 
         state_dict = self.get_context_state(context)
