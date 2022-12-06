@@ -10,12 +10,14 @@ from tap_braintree.streams import (
     TransactionsStream,
     SubscriptionsStream,
     PlansStream,
+    CustomersStream,
 )
 
 STREAM_TYPES = [
     TransactionsStream,
     SubscriptionsStream,
     PlansStream,
+    CustomersStream,
 ]
 
 
