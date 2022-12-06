@@ -460,6 +460,40 @@ class SubscriptionsStream(BraintreeStream):
         Property("updated_at", DateTimeType),
     ).to_dict()
 
+class CustomersStream(BraintreeStream):
+    name = "customers"
+    primary_keys = ["id"]
+    replication_key = None
+
+    braintree_obj = braintree.Customer
+    braintree_search = braintree.CustomerSearch.created_at
+
+    schema = PropertiesList(
+        Property("id", StringType, required=True),
+        Property("email", StringType),
+        Property("phone", StringType),
+        Property("first_name", StringType),
+        Property("last_name", StringType),
+        Property("created_at", DateTimeType),
+        Property("address_country_name", StringType),
+        Property("address_extended_address", StringType),
+        Property("address_first_name", StringType),
+        Property("address_last_name", StringType),
+        Property("address_locality", StringType),
+        Property("address_postal_code", StringType),
+        Property("address_region", StringType),
+        Property("address_street_address", StringType),
+        Property("cardholder_name", StringType),
+        Property("company", StringType),
+        Property("credit_card_expiration_date", StringType),
+        Property("credit_card_number", StringType),
+        Property("fax", StringType),
+        Property("payment_method_token", StringType),
+        Property("payment_method_token_with_duplicates", StringType),
+        Property("paypal_account_email", StringType),
+        Property("website", StringType),
+    ).to_dict()
+
 
 class PlansStream(BraintreeStream):
     name = "plans"
