@@ -463,7 +463,8 @@ class SubscriptionsStream(BraintreeStream):
 class CustomersStream(BraintreeStream):
     name = "customers"
     primary_keys = ["id"]
-    replication_key = None
+    replication_method = "INCREMENTAL"
+    replication_key = "created_at"
 
     braintree_obj = braintree.Customer
     braintree_search = braintree.CustomerSearch.created_at
