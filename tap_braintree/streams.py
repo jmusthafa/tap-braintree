@@ -1,5 +1,4 @@
 """Stream type classes for tap-braintree."""
-# hi there
 
 from typing import Any, Dict, Optional, Union, List, Iterable
 
@@ -70,7 +69,10 @@ class TransactionsStream(BraintreeStream):
         Property("credit_card_unique_number_identifier", StringType),
         Property("credit_card_venmo_sdk", BooleanType),
         Property("currency_iso_code", StringType),
-        Property("custom_fields", StringType),
+        # Property("custom_fields", StringType),
+        Property("custom_fields_upsellery_customer_id", StringType),
+        Property("custom_fields_upsellery_transaction_id", StringType),
+        Property("custom_fields_email", StringType),
         Property("customer_email", StringType),
         Property("customer_first_name", StringType),
         Property("customer_global_id", StringType),
