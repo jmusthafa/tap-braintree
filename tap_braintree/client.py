@@ -17,8 +17,6 @@ from requests.exceptions import ReadTimeout
 from singer_sdk.streams import Stream
 import copy
 
-utc=pytz.UTC
-
 
 class BraintreeStream(Stream):
     """Stream class for braintree2 streams."""
