@@ -165,7 +165,9 @@ class BraintreeStream(Stream):
 
         self.set_braintree_config()
         start_timestamp = self.get_starting_timestamp(context) or isoparse(self.start_date)
+        start_timestamp = start_timestamp.replace(tzinfo=pytz.timezone('UTC'))
         end_timestamp = datetime.utcnow()
+        end_timestamp = end_timestamp.replace(tzinfo=pytz.timezone('UTC'))
         self.logger.info(f'start timestamp is: {start_timestamp} and end timestamp is: {end_timestamp}')
         state_dict = self.get_context_state(context)
         self.logger.info(f" state_dict: {state_dict}")
