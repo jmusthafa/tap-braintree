@@ -17,6 +17,8 @@ from requests.exceptions import ReadTimeout
 from singer_sdk.streams import Stream
 import copy
 
+utc=pytz.UTC
+
 
 class BraintreeStream(Stream):
     """Stream class for braintree2 streams."""
@@ -26,8 +28,8 @@ class BraintreeStream(Stream):
         return Descriptor, DisbursementDetail, RiskData, TransactionDetails
 
     @property
-    def fetch_records_interval_days(self):
-        return self.config.get("fetch_records_interval_days", 1)
+    def fetch_records_interval_hours(self):
+        return self.config.get("fetch_records_interval_hours", 24)
 
     @property
     def start_date(self):
@@ -46,7 +48,7 @@ class BraintreeStream(Stream):
         }
 
     @staticmethod
-    def date_range(start_date, end_date, interval_in_days=1):
+    def date_range(start_date, end_date, interval_in_hours=24):
         """
         Generator function that produces an iterable list of days between the two
         dates start_date and end_date as a tuple pair of datetimes.
@@ -62,13 +64,16 @@ class BraintreeStream(Stream):
                 * datetime: day within range + interval_in_days
 
         """
-
-        start_date = (datetime.combine(start_date.date(), datetime.min.time())
-                      - timedelta(interval_in_days)).replace(tzinfo=pytz.UTC)
-        end_date = (end_date + timedelta(1)).replace(tzinfo=pytz.UTC)
-
-        for n in range(0, int((end_date - start_date).days), interval_in_days):
-            yield start_date + timedelta(n), start_date + timedelta(n + interval_in_days)
+        current_date = start_date
+        while current_date < end_date:
+            interval_start = current_date
+            interval_end = current_date + timedelta(hours=interval_in_hours)
+            
+            if interval_end > end_date:
+                interval_end = end_date
+            
+            yield interval_start, interval_end
+            current_date = interval_end
 
     def check_api_result_limits(self, results):
         try:
@@ -162,8 +167,10 @@ class BraintreeStream(Stream):
 
         self.set_braintree_config()
         start_timestamp = self.get_starting_timestamp(context) or isoparse(self.start_date)
+        start_timestamp = start_timestamp.replace(tzinfo=pytz.timezone('UTC'))
         end_timestamp = datetime.utcnow()
-
+        end_timestamp = end_timestamp.replace(tzinfo=pytz.timezone('UTC'))
+        self.logger.info(f'start timestamp is: {start_timestamp} and end timestamp is: {end_timestamp}')
         state_dict = self.get_context_state(context)
         self.logger.info(f" state_dict: {state_dict}")
         self.logger.info(f" tap_states: {self.tap_state}")
@@ -176,13 +183,13 @@ class BraintreeStream(Stream):
         last_updated = datetime.strptime(self.global_stream_state, '%Y-%m-%d')
 
         for start, end in self.date_range(start_timestamp, end_timestamp,
-                                          interval_in_days=self.fetch_records_interval_days):
+                                          interval_in_hours=self.fetch_records_interval_hours):
             try:
                 records = self.braintree_obj.search(self.braintree_search.between(start, end))
                 self.check_api_result_limits(records)
                 max_records_expected = records.maximum_size
                 self.logger.info(" {}: Fetched {} records from {} - {}".format(self.name, max_records_expected,
-                                                                               start.date(), end.date()))
+                                                                               start, end))
 
                 processed_count = 0
                 self.logger.info(f"last_updated: {last_updated}")
