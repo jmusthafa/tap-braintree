@@ -20,7 +20,7 @@ class TransactionsStream(BraintreeStream):
     name = "transactions"
     primary_keys = ["id"]
     replication_method = "INCREMENTAL"
-    replication_key = "created_at"
+    replication_key = "updated_at"
 
     braintree_obj = braintree.Transaction
     braintree_search = braintree.TransactionSearch.created_at
