@@ -1,6 +1,7 @@
 """Custom client handling, including BraintreeStream base class."""
 import braintree
 import pytz
+import time
 from flatten_json import flatten
 from datetime import datetime, timedelta, date
 from dateutil.parser import isoparse
@@ -170,6 +171,7 @@ class BraintreeStream(Stream):
         end_timestamp = end_timestamp.replace(tzinfo=pytz.timezone('UTC'))
         self.logger.info(f'start timestamp is: {start_timestamp} and end timestamp is: {end_timestamp}')
         state_dict = self.get_context_state(context)
+
         self.logger.info(f" state_dict: {state_dict}")
         self.logger.info(f" tap_states: {self.tap_state}")
 
@@ -182,31 +184,41 @@ class BraintreeStream(Stream):
 
         for start, end in self.date_range(start_timestamp, end_timestamp,
                                           interval_in_hours=self.fetch_records_interval_hours):
-            try:
-                records = self.braintree_obj.search(self.braintree_search.between(start, end))
-                self.check_api_result_limits(records)
-                max_records_expected = records.maximum_size
-                self.logger.info(" {}: Fetched {} records from {} - {}".format(self.name, max_records_expected,
-                                                                               start, end))
+            while True:
+                try:
+                    records = self.braintree_obj.search(self.braintree_search.between(start, end))
+                    self.check_api_result_limits(records)
+                    max_records_expected = records.maximum_size
+                    self.logger.info(" {}: Fetched {} records from {} - {}".format(self.name, max_records_expected,
+                                                                                start, end))
 
-                processed_count = 0
-                self.logger.info(f"last_updated: {last_updated}")
-                for record in records:
-                    if self.contains_latest_record(record, last_updated):
-                        processed_count += 1
-                        yield self.parse_record(record)
+                    processed_count = 0
+                    self.logger.info(f"last_updated: {last_updated}")
+                    for record in records:
+                        if self.contains_latest_record(record, last_updated):
+                            if record.updated_at > run_maximum_updated:
+                                run_maximum_updated = record.updated_at
+                            processed_count += 1
+                            yield self.parse_record(record)
 
-            except (ConnectionError, ReadTimeout) as e:
-                self.logger.error(" {}: Failed to process records from {} - {}".format(self.name,
-                                                                                       start.date(),
-                                                                                       end.date(),
-                                                                                       ))
-                self.logger.error(f" Exception: {str(e)}")
-                self.logger.error(f" Exception occurred while processing record:\n{record}")
+                except (braintree.exceptions.down_for_maintenance_error.DownForMaintenanceError) as e:
+                    self.logger.error(f" Exception: {str(e)}")
+                    self.logger.error("Waiting 1 hour, then trying again...")
+                    time.sleep(3600)
+                    continue
+
+                except (ConnectionError, ReadTimeout) as e:
+                    self.logger.error(" {}: Failed to process records from {} - {}".format(self.name,
+                                                                                        start.date(),
+                                                                                        end.date(),
+                                                                                        ))
+                    self.logger.error(f" Exception: {str(e)}")
+                    self.logger.error(f" Exception occurred while processing record:\n{record}")
+                    break
+
+                self.logger.info(" {}: Processed {} of {} records at {}".format(self.name,
+                                                                                processed_count,
+                                                                                max_records_expected,
+                                                                                datetime.utcnow()))
                 break
-
-            self.logger.info(" {}: Processed {} of {} records at {}".format(self.name,
-                                                                            processed_count,
-                                                                            max_records_expected,
-                                                                            datetime.utcnow()))
 
