@@ -41,9 +41,9 @@ class BraintreeStream(Stream):
     @property
     def braintree_config_merchant_id(self) -> dict:
         return {
-            'merchant_id': self.config["merchant_id"],
-            'public_key': self.config["public_key"],
-            'private_key': self.config["private_key"],
+            "merchant_id": self.config["merchant_id"],
+            "public_key": self.config["public_key"],
+            "private_key": self.config["private_key"],
         }
 
     @staticmethod
@@ -67,22 +67,25 @@ class BraintreeStream(Stream):
         while current_date < end_date:
             interval_start = current_date
             interval_end = current_date + timedelta(hours=interval_in_hours)
-            
+
             if interval_end > end_date:
                 interval_end = end_date
-            
+
             yield interval_start, interval_end
             current_date = interval_end
 
     def check_api_result_limits(self, results):
         try:
-            if self.name == 'transactions':
+            if self.name == "transactions":
                 assert results.maximum_size < 50000
             else:
                 assert results.maximum_size < 10000
         except AssertionError as e:
-            self.logger.error(" ERROR: {} stream exceeded maximum records from API".format(self.name,
-                                                                                           results.maximum_size))
+            self.logger.error(
+                " ERROR: {} stream exceeded maximum records from API".format(
+                    self.name, results.maximum_size
+                )
+            )
 
     def set_braintree_config(self):
         config = self.braintree_config_merchant_id
@@ -100,14 +103,20 @@ class BraintreeStream(Stream):
             return d
 
         for attr in attributes:
-            if hasattr(d, attr) and isinstance(getattr(d, attr), (list, set, tuple, types.GeneratorType)):
+            if hasattr(d, attr) and isinstance(
+                getattr(d, attr), (list, set, tuple, types.GeneratorType)
+            ):
                 child_obj_list = []
                 # self.logger.info('array: \n{}'.format(getattr(d, attr)))
                 for obj in getattr(d, attr):
                     if isinstance(obj, dict):
-                        child_obj_list.append(flatten(self.object_to_dict(obj, ignore_obj, level=level)))
+                        child_obj_list.append(
+                            flatten(self.object_to_dict(obj, ignore_obj, level=level))
+                        )
                     else:
-                        child_obj_list.append(self.object_to_dict(obj, ignore_obj, level=level))
+                        child_obj_list.append(
+                            self.object_to_dict(obj, ignore_obj, level=level)
+                        )
                 if len(child_obj_list) > 0:
                     array_attr[attr] = child_obj_list
 
@@ -117,9 +126,15 @@ class BraintreeStream(Stream):
                 flat_attr[attr] = str(getattr(d, attr).replace(tzinfo=pytz.UTC))
             elif hasattr(d, attr) and isinstance(getattr(d, attr), date):
                 value = getattr(d, attr)
-                flat_attr[attr] = str(datetime(value.year, value.month, value.day, tzinfo=pytz.UTC))
-            elif hasattr(d, attr) and isinstance(getattr(d, attr), self.braintree_objects):
-                flat_attr[attr] = self.object_to_dict(getattr(d, attr), ignore_obj, level=level)
+                flat_attr[attr] = str(
+                    datetime(value.year, value.month, value.day, tzinfo=pytz.UTC)
+                )
+            elif hasattr(d, attr) and isinstance(
+                getattr(d, attr), self.braintree_objects
+            ):
+                flat_attr[attr] = self.object_to_dict(
+                    getattr(d, attr), ignore_obj, level=level
+                )
                 # pass
             elif hasattr(d, attr):
                 # if level > 1: self.logger.info('default: \n{}'.format(getattr(d, attr)))
@@ -133,29 +148,47 @@ class BraintreeStream(Stream):
         return flat_attr
 
     def contains_latest_record(self, record, last_updated):
-        if getattr(record, 'updated_at') > last_updated:
+        if getattr(record, "updated_at") > last_updated:
             return True
 
-        if hasattr(record, 'status_history'):
-            sh = getattr(record, 'status_history')
-            if len(sh) and hasattr(sh[-1], 'updated_at') and getattr(sh[-1], 'timestamp') > last_updated:
+        if hasattr(record, "status_history"):
+            sh = getattr(record, "status_history")
+            if (
+                len(sh)
+                and hasattr(sh[-1], "updated_at")
+                and getattr(sh[-1], "timestamp") > last_updated
+            ):
                 return True
 
-        if hasattr(record, 'disputes'):
-            d = getattr(record, 'disputes')
-            if len(d) and hasattr(d[-1], 'updated_at') and getattr(d[-1], 'updated_at') > last_updated:
+        if hasattr(record, "disputes"):
+            d = getattr(record, "disputes")
+            if (
+                len(d)
+                and hasattr(d[-1], "updated_at")
+                and getattr(d[-1], "updated_at") > last_updated
+            ):
                 return True
 
-        if hasattr(record, 'discounts'):
-            d = getattr(record, 'discounts')
-            if len(d) and hasattr(d[-1], 'updated_at') and getattr(d[-1], 'updated_at') > last_updated:
+        if hasattr(record, "discounts"):
+            d = getattr(record, "discounts")
+            if (
+                len(d)
+                and hasattr(d[-1], "updated_at")
+                and getattr(d[-1], "updated_at") > last_updated
+            ):
                 return True
         return False
 
     def parse_record(self, record) -> dict:
-        json_obj = {'disputes', 'status_history', 'discounts',
-                    'risk_data_decision_reasons', 'refund_ids', 'refund_global_ids'}
-        ignore_obj = {'transactions'}
+        json_obj = {
+            "disputes",
+            "status_history",
+            "discounts",
+            "risk_data_decision_reasons",
+            "refund_ids",
+            "refund_global_ids",
+        }
+        ignore_obj = {"transactions"}
 
         data = self.object_to_dict(record, ignore_obj)
         return data
@@ -165,11 +198,15 @@ class BraintreeStream(Stream):
         self.logger.info(f" tap_states: {self.tap_state}")
 
         self.set_braintree_config()
-        start_timestamp = self.get_starting_timestamp(context) or isoparse(self.start_date)
-        start_timestamp = start_timestamp.replace(tzinfo=pytz.timezone('UTC'))
+        start_timestamp = self.get_starting_timestamp(context) or isoparse(
+            self.start_date
+        )
+        start_timestamp = start_timestamp.replace(tzinfo=pytz.timezone("UTC"))
         end_timestamp = datetime.utcnow()
-        end_timestamp = end_timestamp.replace(tzinfo=pytz.timezone('UTC'))
-        self.logger.info(f'start timestamp is: {start_timestamp} and end timestamp is: {end_timestamp}')
+        end_timestamp = end_timestamp.replace(tzinfo=pytz.timezone("UTC"))
+        self.logger.info(
+            f"start timestamp is: {start_timestamp} and end timestamp is: {end_timestamp}"
+        )
         state_dict = self.get_context_state(context)
 
         self.logger.info(f" state_dict: {state_dict}")
@@ -180,45 +217,61 @@ class BraintreeStream(Stream):
             Come up with a better way to make this work as state isn't working because multi-key state is unsupported
             from one stream and because braintree won't let you query by updated_at for all the needed keys
         """
-        last_updated = datetime.strptime(self.global_stream_state, '%Y-%m-%d')
+        last_updated = datetime.strptime(self.global_stream_state, "%Y-%m-%d")
 
-        for start, end in self.date_range(start_timestamp, end_timestamp,
-                                          interval_in_hours=self.fetch_records_interval_hours):
+        for start, end in self.date_range(
+            start_timestamp,
+            end_timestamp,
+            interval_in_hours=self.fetch_records_interval_hours,
+        ):
             while True:
                 try:
-                    records = self.braintree_obj.search(self.braintree_search.between(start, end))
+                    records = self.braintree_obj.search(
+                        self.braintree_search.between(start, end)
+                    )
                     self.check_api_result_limits(records)
                     max_records_expected = records.maximum_size
-                    self.logger.info(" {}: Fetched {} records from {} - {}".format(self.name, max_records_expected,
-                                                                                start, end))
+                    self.logger.info(
+                        " {}: Fetched {} records from {} - {}".format(
+                            self.name, max_records_expected, start, end
+                        )
+                    )
 
                     processed_count = 0
                     self.logger.info(f"last_updated: {last_updated}")
                     for record in records:
                         if self.contains_latest_record(record, last_updated):
-                            if record.updated_at > run_maximum_updated:
-                                run_maximum_updated = record.updated_at
                             processed_count += 1
                             yield self.parse_record(record)
 
-                except (braintree.exceptions.down_for_maintenance_error.DownForMaintenanceError) as e:
+                except (
+                    braintree.exceptions.down_for_maintenance_error.DownForMaintenanceError
+                ) as e:
                     self.logger.error(f" Exception: {str(e)}")
                     self.logger.error("Waiting 1 hour, then trying again...")
                     time.sleep(3600)
                     continue
 
                 except (ConnectionError, ReadTimeout) as e:
-                    self.logger.error(" {}: Failed to process records from {} - {}".format(self.name,
-                                                                                        start.date(),
-                                                                                        end.date(),
-                                                                                        ))
+                    self.logger.error(
+                        " {}: Failed to process records from {} - {}".format(
+                            self.name,
+                            start.date(),
+                            end.date(),
+                        )
+                    )
                     self.logger.error(f" Exception: {str(e)}")
-                    self.logger.error(f" Exception occurred while processing record:\n{record}")
+                    self.logger.error(
+                        f" Exception occurred while processing record:\n{record}"
+                    )
                     break
 
-                self.logger.info(" {}: Processed {} of {} records at {}".format(self.name,
-                                                                                processed_count,
-                                                                                max_records_expected,
-                                                                                datetime.utcnow()))
+                self.logger.info(
+                    " {}: Processed {} of {} records at {}".format(
+                        self.name,
+                        processed_count,
+                        max_records_expected,
+                        datetime.utcnow(),
+                    )
+                )
                 break
-
