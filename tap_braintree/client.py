@@ -4,6 +4,7 @@ import pytz
 import time
 from flatten_json import flatten
 from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 from dateutil.parser import isoparse
 
 import types
@@ -32,7 +33,11 @@ class BraintreeStream(Stream):
 
     @property
     def start_date(self):
-        return self.config["start_date"]
+        if self.name == 'subscriptions':
+            return str(datetime.now() - relativedelta(years=2))
+        else:
+            return self.config["start_date"]
+    
 
     @property
     def global_stream_state(self):
