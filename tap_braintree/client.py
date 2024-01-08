@@ -35,6 +35,8 @@ class BraintreeStream(Stream):
     def start_date(self):
         if self.name == 'subscriptions':
             return str(datetime.now() - relativedelta(years=2))
+        elif self.name == 'transactions':
+            return str(datetime.now() - relativedelta(months=1))
         else:
             return self.config["start_date"]
     

@@ -19,8 +19,7 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class TransactionsStream(BraintreeStream):
     name = "transactions"
     primary_keys = ["id"]
-    replication_method = "INCREMENTAL"
-    replication_key = "updated_at"
+    replication_key = None
 
     braintree_obj = braintree.Transaction
     braintree_search = braintree.TransactionSearch.created_at
