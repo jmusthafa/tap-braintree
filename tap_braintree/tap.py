@@ -30,6 +30,7 @@ class TapBraintree(Tap):
         th.Property("public_key", th.StringType, required=True),
         th.Property("private_key", th.StringType, required=True),
         th.Property("start_date", th.DateTimeType, required=True),
+        th.Property("sync_state", th.StringType, required=True),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
