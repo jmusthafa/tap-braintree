@@ -37,19 +37,19 @@ class BraintreeStream(Stream):
         # need the last month of transactions because within that time period, their status
         # would update and shouldn't update again after that. For subscriptions, things
         # get a bit more complicated. On a daily basis, we only really need to fetch the
-        # last 3 months of data, because that would capture daily trials started, as well
-        # as our TTP and TTA conversions. But, since subscription states can change past
-        # that point, there's additional logic allowing for a weekly sync (grabs the last
-        # 2 years) and full sync of subscriptions data
+        # last few days of data, because that would capture daily trials started But, since
+        # we care about the state of TTP and TTA subscriptions there's additional logic
+        # allowing for a weekly sync (grabs the last 3 months) and full sync of subscriptions
+        # data
         if self.config["sync_state"] == 'regular':
             if self.name == 'subscriptions':
-                return str(datetime.now() - relativedelta(months=3))
+                return str(datetime.now() - relativedelta(days=7))
             elif self.name == 'transactions':
                 return str(datetime.now() - relativedelta(months=1))
             else:
                 return self.config["start_date"]
-        elif self.config["sync_state"] == 'last 2 years':
-            return str(datetime.now() - relativedelta(years=2))
+        elif self.config["sync_state"] == 'last 3 months':
+            return str(datetime.now() - relativedelta(months=3))
         elif self.config["sync_state"] == 'full':
             return self.config["start_date"]
     
