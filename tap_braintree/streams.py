@@ -3,7 +3,15 @@
 from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk.typing import PropertiesList, Property
-from singer_sdk.typing import StringType, BooleanType, ObjectType, DateTimeType, ArrayType, NumberType, IntegerType
+from singer_sdk.typing import (
+    StringType,
+    BooleanType,
+    ObjectType,
+    DateTimeType,
+    ArrayType,
+    NumberType,
+    IntegerType,
+)
 
 import time
 from datetime import datetime, timedelta, date
@@ -71,7 +79,7 @@ class TransactionsStream(BraintreeStream):
         Property("custom_fields", StringType),
         Property("custom_fields_upsellery_billing_cycle", StringType),
         Property("custom_fields_upsellery_subscription_period_id", StringType),
-        Property("custom_fields_upsellery_subscription_id", StringType),        
+        Property("custom_fields_upsellery_subscription_id", StringType),
         Property("custom_fields_upsellery_customer_id", StringType),
         Property("custom_fields_upsellery_transaction_id", StringType),
         Property("custom_fields_email", StringType),
@@ -89,66 +97,69 @@ class TransactionsStream(BraintreeStream):
         Property("disbursement_details_settlement_currency_iso_code", StringType),
         Property("disbursement_details_success", BooleanType),
         # Property("disputes", StringType),
-        Property("disputes",
-                 ArrayType(
-                     ObjectType(
-                         Property("amount", NumberType),
-                         Property("amount_disputed", NumberType),
-                         Property("amount_won", NumberType),
-                         Property("case_number", StringType),
-                         Property("chargeback_protection_level", StringType),
-                         Property("created_at", StringType),
-                         Property("currency_iso_code", StringType),
-                         Property("date_opened", StringType),
-                         Property("date_won", StringType),
-                         Property("global_id", StringType),
-                         Property("graphql_id", StringType),
-                         Property("id", StringType),
-                         Property("kind", StringType),
-                         Property("merchant_account_id", StringType),
-                         Property("original_dispute_id", StringType),
-                         Property("processor_comments", StringType),
-                         Property("processor_reply_by_date", StringType),
-                         Property("reason", StringType),
-                         Property("reason_code", StringType),
-                         Property("reason_description", StringType),
-                         Property("received_date", StringType),
-                         Property("reference_number", StringType),
-                         Property("reply_by_date", StringType),
-                         Property("response_deadline", StringType),
-                         Property("status", StringType),
-                         Property("updated_at", DateTimeType),
-                         Property("evidence",
-                                  ArrayType(
-                                      ObjectType(
-                                          Property("id", StringType),
-                                          Property("tag", StringType),
-                                          Property("url", StringType),
-                                          Property("comment", StringType),
-                                          Property("category", StringType),
-                                          Property("global_id", StringType),
-                                          Property("created_at", DateTimeType),
-                                          Property("graphql_id", StringType),
-                                          Property("sequence_number", StringType),
-                                          Property("sent_to_processor_at", StringType),
-                                      )
-                                  )
-                                  ),
-                         Property("status_history",
-                                  ArrayType(
-                                      ObjectType(
-                                          Property("id", StringType),
-                                          Property("amount", NumberType),
-                                          Property("status", StringType),
-                                          Property("user", StringType),
-                                          Property("transaction_source", StringType),
-                                          Property("timestamp", DateTimeType),
-                                      )
-                                  )
-                                  )
-                     )
-                 )
-                 ),
+        Property(
+            "disputes",
+            ArrayType(
+                ObjectType(
+                    Property("amount", NumberType),
+                    Property("amount_disputed", NumberType),
+                    Property("amount_won", NumberType),
+                    Property("case_number", StringType),
+                    Property("chargeback_protection_level", StringType),
+                    Property("created_at", StringType),
+                    Property("currency_iso_code", StringType),
+                    Property("date_opened", StringType),
+                    Property("date_won", StringType),
+                    Property("global_id", StringType),
+                    Property("graphql_id", StringType),
+                    Property("id", StringType),
+                    Property("kind", StringType),
+                    Property("merchant_account_id", StringType),
+                    Property("original_dispute_id", StringType),
+                    Property("processor_comments", StringType),
+                    Property("processor_reply_by_date", StringType),
+                    Property("reason", StringType),
+                    Property("reason_code", StringType),
+                    Property("reason_description", StringType),
+                    Property("received_date", StringType),
+                    Property("reference_number", StringType),
+                    Property("reply_by_date", StringType),
+                    Property("response_deadline", StringType),
+                    Property("status", StringType),
+                    Property("updated_at", DateTimeType),
+                    Property(
+                        "evidence",
+                        ArrayType(
+                            ObjectType(
+                                Property("id", StringType),
+                                Property("tag", StringType),
+                                Property("url", StringType),
+                                Property("comment", StringType),
+                                Property("category", StringType),
+                                Property("global_id", StringType),
+                                Property("created_at", DateTimeType),
+                                Property("graphql_id", StringType),
+                                Property("sequence_number", StringType),
+                                Property("sent_to_processor_at", StringType),
+                            )
+                        ),
+                    ),
+                    Property(
+                        "status_history",
+                        ArrayType(
+                            ObjectType(
+                                Property("id", StringType),
+                                Property("amount", NumberType),
+                                Property("status", StringType),
+                                Property("user", StringType),
+                                Property("transaction_source", StringType),
+                                Property("timestamp", DateTimeType),
+                            )
+                        ),
+                    ),
+                )
+            ),
+        ),
         Property("global_id", StringType),
         Property("graphql_id", StringType),
         Property("merchant_account_id", StringType),
@@ -215,18 +226,19 @@ class TransactionsStream(BraintreeStream):
         Property("risk_data_fraud_service_provider", StringType),
         Property("settlement_batch_id", StringType),
         Property("status", StringType),
-        Property("status_history",
-                 ArrayType(
-                     ObjectType(
-                         Property("id", StringType),
-                         Property("amount", NumberType),
-                         Property("status", StringType),
-                         Property("user", StringType),
-                         Property("transaction_source", StringType),
-                         Property("timestamp", DateTimeType)
-                     )
-                 )
-                 ),
+        Property(
+            "status_history",
+            ArrayType(
+                ObjectType(
+                    Property("id", StringType),
+                    Property("amount", NumberType),
+                    Property("status", StringType),
+                    Property("user", StringType),
+                    Property("transaction_source", StringType),
+                    Property("timestamp", DateTimeType),
+                )
+            ),
+        ),
         Property("subscription_billing_period_end_date", DateTimeType),
         Property("subscription_billing_period_start_date", DateTimeType),
         Property("subscription_id", StringType),
@@ -234,7 +246,6 @@ class TransactionsStream(BraintreeStream):
         Property("terminal_identification_number", StringType),
         Property("type", StringType),
         Property("updated_at", DateTimeType),
-
         Property("amount_requested", StringType),
         Property("sub_merchant_account_id", StringType),
         Property("master_merchant_account_id", StringType),
@@ -269,7 +280,9 @@ class TransactionsStream(BraintreeStream):
         Property("descriptor_url", StringType),
         Property("service_fee_amount", StringType),
         Property("escrow_status", StringType),
-        Property("disbursement_details_settlement_base_currency_exchange_rate", StringType),
+        Property(
+            "disbursement_details_settlement_base_currency_exchange_rate", StringType
+        ),
         Property("three_d_secure_info", StringType),
         Property("ships_from_postal_code", StringType),
         Property("shipping_amount", NumberType),
@@ -301,7 +314,6 @@ class TransactionsStream(BraintreeStream):
         Property("paypal_paypal_retail_transaction_lookup_url", StringType),
         Property("paypal_app_used_for_scanning", StringType),
         Property("refunded_installments", StringType),
-
         Property("payment_receipt_id", StringType),
         Property("payment_receipt_global_id", StringType),
         Property("payment_receipt_amount", StringType),
@@ -322,20 +334,20 @@ class TransactionsStream(BraintreeStream):
         Property("payment_receipt_card_type", StringType),
         Property("payment_receipt_card_last_4", StringType),
         Property("payment_receipt_pin_verified", BooleanType),
-
-        Property("discounts",
-                 ArrayType(
-                     ObjectType(
-                         Property("amount", NumberType),
-                         Property("current_billing_cycle", IntegerType),
-                         Property("id", StringType),
-                         Property("name", StringType),
-                         Property("never_expires", BooleanType),
-                         Property("number_of_billing_cycles", IntegerType),
-                         Property("quantity", IntegerType),
-                     )
-                 )
-                 ),
+        Property(
+            "discounts",
+            ArrayType(
+                ObjectType(
+                    Property("amount", NumberType),
+                    Property("current_billing_cycle", IntegerType),
+                    Property("id", StringType),
+                    Property("name", StringType),
+                    Property("never_expires", BooleanType),
+                    Property("number_of_billing_cycles", IntegerType),
+                    Property("quantity", IntegerType),
+                )
+            ),
+        ),
     ).to_dict()
 
 
@@ -360,79 +372,83 @@ class SubscriptionsStream(BraintreeStream):
         Property("descriptor_name", StringType),
         Property("descriptor_phone", StringType),
         Property("descriptor_url", StringType),
-        Property("discounts",
-                 ArrayType(
-                     ObjectType(
-                         Property("amount", NumberType),
-                         Property("current_billing_cycle", IntegerType),
-                         Property("id", StringType),
-                         Property("name", StringType),
-                         Property("never_expires", BooleanType),
-                         Property("number_of_billing_cycles", IntegerType),
-                         Property("quantity", IntegerType),
-                     )
-                 )
-                 ),
-        Property("disputes",
-                 ArrayType(
-                     ObjectType(
-                         Property("amount", NumberType),
-                         Property("amount_disputed", NumberType),
-                         Property("amount_won", NumberType),
-                         Property("case_number", StringType),
-                         Property("chargeback_protection_level", StringType),
-                         Property("created_at", StringType),
-                         Property("currency_iso_code", StringType),
-                         Property("date_opened", StringType),
-                         Property("date_won", StringType),
-                         Property("global_id", StringType),
-                         Property("graphql_id", StringType),
-                         Property("id", StringType),
-                         Property("kind", StringType),
-                         Property("merchant_account_id", StringType),
-                         Property("original_dispute_id", StringType),
-                         Property("processor_comments", StringType),
-                         Property("processor_reply_by_date", StringType),
-                         Property("reason", StringType),
-                         Property("reason_code", StringType),
-                         Property("reason_description", StringType),
-                         Property("received_date", StringType),
-                         Property("reference_number", StringType),
-                         Property("reply_by_date", StringType),
-                         Property("response_deadline", StringType),
-                         Property("status", StringType),
-                         Property("updated_at", DateTimeType),
-                         Property("evidence",
-                                  ArrayType(
-                                      ObjectType(
-                                          Property("id", StringType),
-                                          Property("tag", StringType),
-                                          Property("url", StringType),
-                                          Property("comment", StringType),
-                                          Property("category", StringType),
-                                          Property("global_id", StringType),
-                                          Property("created_at", DateTimeType),
-                                          Property("graphql_id", StringType),
-                                          Property("sequence_number", StringType),
-                                          Property("sent_to_processor_at", StringType),
-                                      )
-                                  )
-                                  ),
-                         Property("status_history",
-                                  ArrayType(
-                                      ObjectType(
-                                          Property("id", StringType),
-                                          Property("amount", NumberType),
-                                          Property("status", StringType),
-                                          Property("user", StringType),
-                                          Property("transaction_source", StringType),
-                                          Property("timestamp", DateTimeType),
-                                      )
-                                  )
-                                  )
-                     )
-                 )
-                 ),
+        Property(
+            "discounts",
+            ArrayType(
+                ObjectType(
+                    Property("amount", NumberType),
+                    Property("current_billing_cycle", IntegerType),
+                    Property("id", StringType),
+                    Property("name", StringType),
+                    Property("never_expires", BooleanType),
+                    Property("number_of_billing_cycles", IntegerType),
+                    Property("quantity", IntegerType),
+                )
+            ),
+        ),
+        Property(
+            "disputes",
+            ArrayType(
+                ObjectType(
+                    Property("amount", NumberType),
+                    Property("amount_disputed", NumberType),
+                    Property("amount_won", NumberType),
+                    Property("case_number", StringType),
+                    Property("chargeback_protection_level", StringType),
+                    Property("created_at", StringType),
+                    Property("currency_iso_code", StringType),
+                    Property("date_opened", StringType),
+                    Property("date_won", StringType),
+                    Property("global_id", StringType),
+                    Property("graphql_id", StringType),
+                    Property("id", StringType),
+                    Property("kind", StringType),
+                    Property("merchant_account_id", StringType),
+                    Property("original_dispute_id", StringType),
+                    Property("processor_comments", StringType),
+                    Property("processor_reply_by_date", StringType),
+                    Property("reason", StringType),
+                    Property("reason_code", StringType),
+                    Property("reason_description", StringType),
+                    Property("received_date", StringType),
+                    Property("reference_number", StringType),
+                    Property("reply_by_date", StringType),
+                    Property("response_deadline", StringType),
+                    Property("status", StringType),
+                    Property("updated_at", DateTimeType),
+                    Property(
+                        "evidence",
+                        ArrayType(
+                            ObjectType(
+                                Property("id", StringType),
+                                Property("tag", StringType),
+                                Property("url", StringType),
+                                Property("comment", StringType),
+                                Property("category", StringType),
+                                Property("global_id", StringType),
+                                Property("created_at", DateTimeType),
+                                Property("graphql_id", StringType),
+                                Property("sequence_number", StringType),
+                                Property("sent_to_processor_at", StringType),
+                            )
+                        ),
+                    ),
+                    Property(
+                        "status_history",
+                        ArrayType(
+                            ObjectType(
+                                Property("id", StringType),
+                                Property("amount", NumberType),
+                                Property("status", StringType),
+                                Property("user", StringType),
+                                Property("transaction_source", StringType),
+                                Property("timestamp", DateTimeType),
+                            )
+                        ),
+                    ),
+                )
+            ),
+        ),
         Property("failure_count", IntegerType),
         Property("first_billing_date", StringType),
         Property("merchant_account_id", StringType),
@@ -447,23 +463,25 @@ class SubscriptionsStream(BraintreeStream):
         Property("refund_global_ids", StringType),
         Property("refund_ids", StringType),
         Property("status", StringType),
-        Property("status_history",
-                 ArrayType(
-                     ObjectType(
-                         Property("id", StringType),
-                         Property("amount", NumberType),
-                         Property("status", StringType),
-                         Property("user", StringType),
-                         Property("subscription_source", StringType),
-                         Property("timestamp", DateTimeType),
-                     )
-                 )
-                 ),
+        Property(
+            "status_history",
+            ArrayType(
+                ObjectType(
+                    Property("id", StringType),
+                    Property("amount", NumberType),
+                    Property("status", StringType),
+                    Property("user", StringType),
+                    Property("subscription_source", StringType),
+                    Property("timestamp", DateTimeType),
+                )
+            ),
+        ),
         Property("trial_duration", IntegerType),
         Property("trial_duration_unit", StringType),
         Property("trial_period", BooleanType),
         Property("updated_at", DateTimeType),
     ).to_dict()
+
 
 class CustomersStream(BraintreeStream):
     name = "customers"
@@ -481,14 +499,6 @@ class CustomersStream(BraintreeStream):
         Property("first_name", StringType),
         Property("last_name", StringType),
         Property("created_at", DateTimeType),
-        Property("address_country_name", StringType),
-        Property("address_extended_address", StringType),
-        Property("address_first_name", StringType),
-        Property("address_last_name", StringType),
-        Property("address_locality", StringType),
-        Property("address_postal_code", StringType),
-        Property("address_region", StringType),
-        Property("address_street_address", StringType),
         Property("cardholder_name", StringType),
         Property("company", StringType),
         Property("credit_card_expiration_date", StringType),
@@ -498,6 +508,22 @@ class CustomersStream(BraintreeStream):
         Property("payment_method_token_with_duplicates", StringType),
         Property("paypal_account_email", StringType),
         Property("website", StringType),
+        Property("address_id", StringType),
+        Property("address_customer_id", StringType),
+        Property("address_first_name", StringType),
+        Property("address_last_name", StringType),
+        Property("address_company", StringType),
+        Property("address_street_address", StringType),
+        Property("address_extended_address", StringType),
+        Property("address_locality", StringType),
+        Property("address_region", StringType),
+        Property("address_postal_code", StringType),
+        Property("address_country_name", StringType),
+        Property("address_country_code_alpha2", StringType),
+        Property("address_country_code_alpha3", StringType),
+        Property("address_country_code_numeric", StringType),
+        Property("address_created_at", DateTimeType),
+        Property("address_updated_at", DateTimeType),
     ).to_dict()
 
 
@@ -525,22 +551,23 @@ class PlansStream(BraintreeStream):
         Property("created_at", DateTimeType),
         Property("updated_at", DateTimeType),
         Property("refund_global_ids", StringType),
-        Property("discounts",
-                 ArrayType(
-                     ObjectType(
-                         Property("id", StringType, required=True),
-                         Property("amount", NumberType),
-                         Property("name", StringType),
-                         Property("kind", StringType),
-                         Property("description", StringType),
-                         Property("created_at", DateTimeType),
-                         Property("updated_at", DateTimeType),
-                         Property("number_of_billing_cycles", IntegerType),
-                         Property("merchant_id", StringType),
-                         Property("never_expires", BooleanType),
-                     )
-                 )
-                 ),
+        Property(
+            "discounts",
+            ArrayType(
+                ObjectType(
+                    Property("id", StringType, required=True),
+                    Property("amount", NumberType),
+                    Property("name", StringType),
+                    Property("kind", StringType),
+                    Property("description", StringType),
+                    Property("created_at", DateTimeType),
+                    Property("updated_at", DateTimeType),
+                    Property("number_of_billing_cycles", IntegerType),
+                    Property("merchant_id", StringType),
+                    Property("never_expires", BooleanType),
+                )
+            ),
+        ),
         # Property("refund", StringType),
         # Property("refund_ids", StringType),
         # Property("refund_global_ids", StringType),
