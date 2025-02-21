@@ -121,13 +121,13 @@ class BraintreeStream(Stream):
             return d
 
         for attr in attributes:
-            if attr == 'addresses' and hasattr(d, attr):
+            if attr == "addresses" and hasattr(d, attr):
                 # Get the first address with a non-None country_code_alpha2
                 addresses = getattr(d, attr)
                 if addresses and len(addresses) > 0:
                     valid_address = next(
-                        (addr for addr in addresses if hasattr(addr, 'country_code_alpha2') 
-                         and getattr(addr, 'country_code_alpha2') is not None),
+                        (addr for addr in addresses if hasattr(addr, "country_code_alpha2") 
+                         and getattr(addr, "country_code_alpha2") is not None),
                         addresses[0]  # Fallback to first address if none found
                     )
                     # Prefix address fields to avoid conflicts
@@ -139,7 +139,6 @@ class BraintreeStream(Stream):
                 getattr(d, attr), (list, set, tuple, types.GeneratorType)
             ):
                 child_obj_list = []
-                # self.logger.info('array: \n{}'.format(getattr(d, attr)))
                 for obj in getattr(d, attr):
                     if isinstance(obj, dict):
                         child_obj_list.append(
@@ -167,9 +166,7 @@ class BraintreeStream(Stream):
                 flat_attr[attr] = self.object_to_dict(
                     getattr(d, attr), ignore_obj, level=level
                 )
-                # pass
             elif hasattr(d, attr):
-                # if level > 1: self.logger.info('default: \n{}'.format(getattr(d, attr)))
                 flat_attr[attr] = getattr(d, attr)
             else:
                 return
