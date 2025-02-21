@@ -17,7 +17,6 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 
 from requests.exceptions import ReadTimeout
 from singer_sdk.streams import Stream
-import copy
 
 
 class BraintreeStream(Stream):
@@ -41,18 +40,17 @@ class BraintreeStream(Stream):
         # we care about the state of TTP and TTA subscriptions there's additional logic
         # allowing for a weekly sync (grabs the last 3 months) and full sync of subscriptions
         # data
-        if self.config["sync_state"] == 'regular':
-            if self.name == 'subscriptions':
+        if self.config["sync_state"] == "regular":
+            if self.name == "subscriptions":
                 return str(datetime.now() - relativedelta(months=1))
-            elif self.name == 'transactions':
+            elif self.name == "transactions":
                 return str(datetime.now() - relativedelta(months=1))
             else:
                 return self.config["start_date"]
-        elif self.config["sync_state"] == 'last 3 months':
+        elif self.config["sync_state"] == "last 3 months":
             return str(datetime.now() - relativedelta(months=3))
-        elif self.config["sync_state"] == 'full':
+        elif self.config["sync_state"] == "full":
             return self.config["start_date"]
-    
 
     @property
     def global_stream_state(self):
@@ -123,6 +121,20 @@ class BraintreeStream(Stream):
             return d
 
         for attr in attributes:
+            if attr == 'addresses' and hasattr(d, attr):
+                # Get the first address with a non-None country_code_alpha2
+                addresses = getattr(d, attr)
+                if addresses and len(addresses) > 0:
+                    valid_address = next(
+                        (addr for addr in addresses if hasattr(addr, 'country_code_alpha2') 
+                         and getattr(addr, 'country_code_alpha2') is not None),
+                        addresses[0]  # Fallback to first address if none found
+                    )
+                    # Prefix address fields to avoid conflicts
+                    for address_attr in valid_address._setattrs:
+                        if hasattr(valid_address, address_attr):
+                            flat_attr[f"address_{address_attr}"] = getattr(valid_address, address_attr)
+                continue
             if hasattr(d, attr) and isinstance(
                 getattr(d, attr), (list, set, tuple, types.GeneratorType)
             ):
