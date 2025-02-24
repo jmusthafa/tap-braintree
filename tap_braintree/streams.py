@@ -82,6 +82,9 @@ class TransactionsStream(BraintreeStream):
         Property("custom_fields_upsellery_subscription_id", StringType),
         Property("custom_fields_upsellery_customer_id", StringType),
         Property("custom_fields_upsellery_transaction_id", StringType),
+        Property("custom_fields_upsellery_checkout_id", StringType),
+        Property("custom_fields_funnel_slug", StringType),
+        Property("custom_fields_plan_id", StringType),
         Property("custom_fields_email", StringType),
         Property("customer_email", StringType),
         Property("customer_first_name", StringType),
@@ -269,29 +272,27 @@ class TransactionsStream(BraintreeStream):
         Property("shipping_country_code_alpha3", StringType),
         Property("shipping_country_code_numeric", StringType),
         Property("gateway_rejection_reason", StringType),
-        Property("voice_referral_number", StringType),
         Property("purchase_order_number", StringType),
         Property("tax_amount", NumberType),
-        Property("sca_exemption_requested", StringType),
+        Property("surcharge_amount", NumberType),
         Property("credit_card_account_type", StringType),
         Property("credit_card_account_balance", StringType),
         Property("descriptor_name", StringType),
         Property("descriptor_phone", StringType),
         Property("descriptor_url", StringType),
         Property("service_fee_amount", StringType),
-        Property("escrow_status", StringType),
         Property(
             "disbursement_details_settlement_base_currency_exchange_rate", StringType
         ),
         Property("three_d_secure_info", StringType),
         Property("ships_from_postal_code", StringType),
         Property("shipping_amount", NumberType),
+        Property("shipping_tax_amount", NumberType),
         Property("discount_amount", NumberType),
         Property("retried_transaction_id", StringType),
+        Property("retried", BooleanType),
         Property("authorized_transaction_global_id", StringType),
         Property("retried_transaction_global_id", StringType),
-        Property("installment_count", StringType),
-        Property("response_emv_data", StringType),
         Property("debit_network", StringType),
         Property("processing_mode", StringType),
         # Property("refund_ids", StringType),
@@ -300,14 +301,9 @@ class TransactionsStream(BraintreeStream):
         Property("paypal_payee_email", StringType),
         Property("paypal_custom_field", StringType),
         Property("paypal_payer_phone", StringType),
-        Property("paypal_selected_financing_term", StringType),
-        Property("paypal_selected_financing_currency_code", StringType),
-        Property("paypal_selected_financing_discount_percentage", StringType),
         Property("paypal_description", StringType),
         Property("paypal_shipping_option_id", StringType),
         Property("paypal_cobranded_card_label", StringType),
-        Property("paypal_implicitly_vaulted_payment_method_token", StringType),
-        Property("paypal_implicitly_vaulted_payment_method_global_id", StringType),
         Property("paypal_paypal_retail_transaction_id", StringType),
         Property("paypal_paypal_retail_transaction_status", StringType),
         Property("paypal_paypal_retail_transaction_refund_url", StringType),
@@ -348,7 +344,56 @@ class TransactionsStream(BraintreeStream):
                 )
             ),
         ),
+        Property(
+            "add_ons",
+            ArrayType(
+                ObjectType(
+                    Property("id", StringType),
+                    Property("amount", NumberType),
+                    Property("current_billing_cycle", NumberType),
+                    Property("name", StringType),
+                )
+            ),
+        ),
+        Property("subscription_tax_amount", NumberType),
     ).to_dict()
+
+    def parse_record(self, record: Any) -> dict:
+        """Parse the record."""
+        parsed = super().parse_record(record)
+
+        # Calculate subscription_tax_amount from add_ons with name "SaaS_TAX".
+        if hasattr(record, 'add_ons') and record.add_ons:
+            parsed['subscription_tax_amount'] = sum(
+                float(add_on.amount)
+                for add_on in record.add_ons
+                if hasattr(add_on, 'name') and add_on.name == "SaaS_TAX"
+            )
+
+        # If billing country code or billing region is missing try to get it from the
+        # customer object.
+        if parsed['billing_country_code_alpha2'] is None or parsed['billing_region'] is None:
+            try:
+                customer = braintree.Customer.find(parsed["customer_id"])
+                if customer and hasattr(customer, 'addresses') and customer.addresses:
+                    # Find first address with a valid country code.
+                    valid_address = next(
+                        (addr for addr in customer.addresses
+                         if hasattr(addr, 'country_code_alpha2') and
+                         addr.country_code_alpha2 is not None),
+                        None
+                    )
+
+                    if valid_address:
+                        if not parsed.get('billing_country_code_alpha2'):
+                            self.logger.info(f"Found valid address for customer {parsed['customer_id']}")
+                            parsed['billing_country_code_alpha2'] = valid_address.country_code_alpha2
+                        if not parsed.get('billing_region'):
+                            parsed['billing_region'] = valid_address.region
+            except braintree.exceptions.NotFoundError:
+                self.logger.warning(f"Customer {parsed['customer_id']} not found")
+
+        return parsed
 
 
 class SubscriptionsStream(BraintreeStream):
