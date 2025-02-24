@@ -44,7 +44,7 @@ class BraintreeStream(Stream):
             if self.name == "subscriptions":
                 return str(datetime.now() - relativedelta(months=1))
             elif self.name == "transactions":
-                return str(datetime.now() - relativedelta(months=1))
+                return str(datetime.now() - relativedelta(days=10))
             else:
                 return self.config["start_date"]
         elif self.config["sync_state"] == "last 3 months":
