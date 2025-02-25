@@ -372,7 +372,12 @@ class TransactionsStream(BraintreeStream):
 
         # If billing country code or billing region is missing try to get it from the
         # customer object.
-        if parsed['billing_country_code_alpha2'] is None or parsed['billing_region'] is None:
+        if (
+            parsed['billing_country_code_alpha2'] is None
+            or parsed['billing_region'] is None
+            or parsed['billing_country_code_alpha2'] == ''
+            or parsed['billing_region'] == ''
+        ):
             try:
                 customer = braintree.Customer.find(parsed["customer_id"])
                 if customer and hasattr(customer, 'addresses') and customer.addresses:
