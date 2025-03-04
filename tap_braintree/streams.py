@@ -370,6 +370,13 @@ class TransactionsStream(BraintreeStream):
                 if hasattr(add_on, 'name') and add_on.name == "SaaS_TAX"
             )
 
+        # Calculate discount_amount from discounts object.
+        if hasattr(record, 'discounts') and record.discounts:
+            parsed['discount_amount'] = sum(
+                float(discount.amount)
+                for discount in record.discounts
+            )
+
         # If billing country code or billing region is missing try to get it from the
         # customer object.
         if (
