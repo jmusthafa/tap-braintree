@@ -185,7 +185,7 @@ class BraintreeStream(Stream):
             if (
                 len(sh)
                 and hasattr(sh[-1], "updated_at")
-                and getattr(sh[-1], "timestamp") > last_updated
+                and getattr(sh[-1], "updated_at") > last_updated
             ):
                 return True
 
